@@ -1,0 +1,110 @@
+{
+  "personal_info": {
+    "name": "Bony Thomas",
+    "title": "Founder & CEO of PayNback",
+    "tagline": "Empowering Local Retail Through Technology | B2B2C Community Commerce Network",
+    "location": "Bengaluru, Karnataka, India",
+    "contact": {
+      "email": "contact@paynback.com",
+      "phone": "919656512573",
+      "linkedin": "www.linkedin.com/in/bony-thomas-2b0186b",
+      "pobox": "Pobox:5475, Tbilisi, Georgia"
+    }
+  },
+  "summary": "Founder & CEO of PayNback, an AI-driven in-store rewards and customer engagement platform built to scale across India's massive offline retail market. Leading the development of a B2B2C commerce ecosystem that connects small retailers, MSMEs, and local shoppers through instant digital rewards, actionable data insights, and hyperlocal engagement. Championing PayNback's mission to digitize and empower neighbourhood commerce—beginning in Tier-2 and Tier-3 cities that drive nearly 70% of India's retail economy. Focused on accelerating merchant growth, increasing repeat footfall, and enabling micro-retailers to compete effectively with organized retail and e-commerce.",
+  "top_skills": [
+    "Data Analysis",
+    "Brand Development",
+    "Team Building",
+    "Business Development",
+    "Strategic Planning",
+    "AI-driven Engagement",
+    "Product Innovation"
+  ],
+  "certifications": [
+    "Certified Business Professional (CBP)"
+  ],
+  "experience": [
+    {
+      "company": "PayNback",
+      "role": "Chief Executive Officer",
+      "duration": "May 2022 - Present (3+ years)",
+      "location": "India",
+      "description": "Leading PayNback's mission to digitize neighbourhood commerce with AI-driven rewards platform. Overseeing product innovation, fundraising, merchant acquisition, compliance, and strategic partnerships. Targeting 5 lakh merchants and 5 crore users over 7-year roadmap."
+    },
+    {
+      "company": "LC Store",
+      "role": "Business Development Analyst",
+      "duration": "March 2020 - Present (5+ years)",
+      "location": "United Arab Emirates",
+      "description": "Business development and market analysis for retail operations."
+    },
+    {
+      "company": "LC Pay",
+      "role": "Project Development Manager & Business Development Specialist",
+      "duration": "February 2019 - Present (6+ years)",
+      "location": "India & Georgia",
+      "description": "Managing project development initiatives and business expansion strategies across multiple markets."
+    },
+    {
+      "company": "Export & Import Development",
+      "role": "Project Manager",
+      "duration": "February 2013 - August 2017 (4+ years)",
+      "location": "Georgia",
+      "description": "Led import-export development projects and international trade operations."
+    },
+    {
+      "company": "Libra Group",
+      "role": "Managing Consultant",
+      "duration": "September 2015 - August 2020 (5 years)",
+      "location": "Georgia",
+      "description": "Provided strategic management consulting services."
+    },
+    {
+      "company": "Midasllc",
+      "role": "Investment Specialist",
+      "duration": "May 2009 - December 2015 (6+ years)",
+      "location": "Ukraine",
+      "description": "Specialized in investment analysis and portfolio management."
+    },
+    {
+      "company": "B&N Group",
+      "role": "Project Development Manager",
+      "duration": "July 2005 - April 2015 (9+ years)",
+      "location": "United Arab Emirates",
+      "description": "Managed large-scale business development projects across Middle East markets."
+    }
+  ],
+  "education": [
+    {
+      "institution": "Amity University",
+      "degree": "Associate's degree",
+      "field": "Business Administration and Management, General",
+      "year": ""
+    },
+    {
+      "institution": "NCVT",
+      "degree": "Engineer's degree",
+      "field": "Mechanical",
+      "year": "1994 - 1997"
+    }
+  ],
+  "projects": [
+    {
+      "name": "PayNback Platform",
+      "description": "AI-driven in-store rewards and customer engagement platform connecting small retailers, MSMEs, and local shoppers. Features include instant digital rewards, actionable data insights, and hyperlocal engagement tools.",
+      "tech_stack": ["AI/ML", "Data Analytics", "Mobile Technology", "Cloud Infrastructure"],
+      "impact": "Targeting 5 lakh merchants and 5 crore users across India's Tier-2 and Tier-3 cities"
+    }
+  ],
+  "services": [
+    "Business Development Consulting",
+    "AI-driven Commerce Solutions",
+    "Retail Digital Transformation",
+    "Strategic Partnership Development",
+    "Product Innovation & Scaling",
+    "Market Analysis & Expansion",
+    "Investment Advisory"
+  ],
+  "vision": "Building a Made-in-India, investment-ready platform to become India's most trusted community commerce network—strengthening local economies, supporting grassroots retailers, and fueling inclusive digital growth."
+}
