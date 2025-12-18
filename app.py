@@ -78,14 +78,14 @@ def call_openrouter(messages):
         }
         
         data = {
-            "model": "meta-llama/llama-3.2-3b-instruct:free",
+            "model": "meta-llama/llama-3.3-70b-instruct:free",  # Updated to Llama 3.3 70B
             "messages": messages,
-            "max_tokens": 150,  # Limit response length
+            "max_tokens": 200,  # Increased slightly for better responses from larger model
             "temperature": 0.7,  # Balanced creativity
             "top_p": 0.9
         }
         
-        response = requests.post(OPENROUTER_URL, headers=headers, json=data, timeout=15)
+        response = requests.post(OPENROUTER_URL, headers=headers, json=data, timeout=20)
         
         # Handle rate limiting
         if response.status_code == 429:
