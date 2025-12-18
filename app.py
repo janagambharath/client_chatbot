@@ -16,55 +16,68 @@ OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY', 'your-api-key-here')
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 def create_system_prompt():
-    """Generate CONCISE system prompt with portfolio data"""
-    return f"""You are an AI assistant for {PORTFOLIO_DATA['personal_info']['name']}'s portfolio.
+    """Generate system prompt with portfolio data"""
+    return f"""You are an AI assistant representing {PORTFOLIO_DATA['personal_info']['name']}, speaking on his behalf in first person.
 
-NAME: {PORTFOLIO_DATA['personal_info']['name']}
-ROLE: {PORTFOLIO_DATA['personal_info']['title']}
-LOCATION: {PORTFOLIO_DATA['personal_info']['location']}
+ABOUT ME:
+Name: {PORTFOLIO_DATA['personal_info']['name']}
+Role: {PORTFOLIO_DATA['personal_info']['title']}
+Location: {PORTFOLIO_DATA['personal_info']['location']}
 
-KEY FACTS:
-- CEO of PayNback (AI-driven retail rewards platform)
-- Target: 5 lakh merchants, 5 crore users across India
-- Focus: Tier-2/3 cities, digitizing local retail
-- Skills: Data Analysis, Brand Development, Team Building
-- 15+ years experience in business development
+CURRENT POSITION - PayNback CEO:
+I'm the Founder & CEO of PayNback, an AI-driven in-store rewards and customer engagement platform. We're building a B2B2C commerce ecosystem connecting small retailers, MSMEs, and local shoppers across India. Our mission is to digitize neighbourhood commerce, starting in Tier-2 and Tier-3 cities that drive nearly 70% of India's retail economy.
 
-EXPERIENCE HIGHLIGHTS:
-- PayNback CEO (2022-Present): Leading AI commerce platform
-- LC Pay Project Manager (2019-Present): Multi-market expansion
-- B&N Group PM (2005-2015): 10 years UAE operations
+Our ambitious roadmap targets 5 lakh (500,000) merchants and 5 crore (50 million) users over the next 7 years. We provide instant digital rewards, actionable data insights, and hyperlocal engagement tools to help micro-retailers compete with organized retail and e-commerce.
+
+KEY SKILLS & EXPERTISE:
+- Data Analysis & Strategic Planning
+- Brand Development & Product Innovation
+- Team Building & Business Development
+- AI-driven Engagement Solutions
+- Market Expansion & Partnerships
+
+PROFESSIONAL EXPERIENCE:
+- PayNback CEO (May 2022 - Present): Leading product innovation, fundraising, merchant acquisition, compliance, and strategic partnerships
+- LC Pay Project Manager (Feb 2019 - Present): Managing multi-market expansion across India & Georgia
+- LC Store Business Analyst (Mar 2020 - Present): Business development in UAE
+- B&N Group Project Manager (2005-2015): 9+ years managing large-scale projects in Middle East
+- Previous roles in investment, consulting, and international trade
 
 EDUCATION:
-- Amity University: Business Administration
-- NCVT: Mechanical Engineering
+- Associate's degree in Business Administration from Amity University
+- Engineer's degree in Mechanical from NCVT (1994-1997)
 
-CONTACT:
+CERTIFICATIONS:
+- Certified Business Professional (CBP)
+
+CONTACT INFORMATION:
+Email: {PORTFOLIO_DATA['personal_info']['contact']['email']}
 Phone: {PORTFOLIO_DATA['personal_info']['contact']['phone']}
 LinkedIn: {PORTFOLIO_DATA['personal_info']['contact']['linkedin']}
-Email: {PORTFOLIO_DATA['personal_info']['contact']['email']}
 
-INSTRUCTIONS:
-1. Keep responses under 50 words unless asked for details
-2. Be direct and conversational
-3. If unrelated question, politely redirect
-4. Never make up information
-5. Encourage contact for opportunities"""
+COMMUNICATION GUIDELINES:
+1. Respond naturally and conversationally in first person (as Bony Thomas)
+2. Provide detailed, informative responses that showcase expertise
+3. Be enthusiastic about PayNback and the mission to empower local retail
+4. For career/business inquiries, express openness to opportunities and invite contact
+5. If asked about topics outside my background, politely redirect to relevant experience
+6. Never fabricate information - only share what's provided above
+7. Highlight the vision of building India's most trusted community commerce network"""
 
 def get_conversation_history():
-    """Retrieve last 3 exchanges (6 messages) to save tokens"""
+    """Retrieve last 4 exchanges (8 messages) for context"""
     if 'conversation' not in session:
         session['conversation'] = []
-    return session['conversation'][-6:]  # Only last 3 exchanges
+    return session['conversation'][-8:]
 
 def save_message(role, content):
     """Save message to conversation history"""
     if 'conversation' not in session:
         session['conversation'] = []
     session['conversation'].append({"role": role, "content": content})
-    # Keep only last 10 messages to prevent memory buildup
-    if len(session['conversation']) > 10:
-        session['conversation'] = session['conversation'][-10:]
+    # Keep only last 12 messages to maintain context
+    if len(session['conversation']) > 12:
+        session['conversation'] = session['conversation'][-12:]
     session.modified = True
 
 def call_openrouter(messages):
@@ -78,31 +91,31 @@ def call_openrouter(messages):
         }
         
         data = {
-            "model": "meta-llama/llama-3.3-70b-instruct:free",  # Updated to Llama 3.3 70B
+            "model": "meta-llama/llama-3.3-70b-instruct:free",
             "messages": messages,
-            "max_tokens": 350,  # Increased slightly for better responses from larger model
-            "temperature": 0.7,  # Balanced creativity
+            "max_tokens": 400,  # Increased for more detailed responses
+            "temperature": 0.7,
             "top_p": 0.9
         }
         
-        response = requests.post(OPENROUTER_URL, headers=headers, json=data, timeout=20)
+        response = requests.post(OPENROUTER_URL, headers=headers, json=data, timeout=25)
         
         # Handle rate limiting
         if response.status_code == 429:
-            return "I'm receiving too many requests. Please wait a moment and try again."
+            return "I'm receiving too many requests right now. Please wait a moment and try again."
         
         response.raise_for_status()
         result = response.json()
         return result['choices'][0]['message']['content'].strip()
     
     except requests.exceptions.Timeout:
-        return "Response timed out. Please try a shorter question."
+        return "The response timed out. Please try asking again or rephrase your question."
     except requests.exceptions.RequestException as e:
         print(f"API Error: {e}")
-        return "Connection issue. Please try again shortly."
+        return "I'm having trouble connecting right now. Please try again in a moment."
     except Exception as e:
         print(f"Unexpected error: {e}")
-        return "An error occurred. Please try again."
+        return "Something went wrong. Please try your question again."
 
 @app.route('/')
 def home():
@@ -129,7 +142,7 @@ def chat():
         # Save user message
         save_message("user", user_message)
         
-        # Build messages for API (limited history)
+        # Build messages for API
         conversation_history = get_conversation_history()
         messages = [
             {"role": "system", "content": create_system_prompt()}
@@ -151,7 +164,7 @@ def chat():
         return jsonify({
             "response": "Error processing your message. Please try again.",
             "timestamp": datetime.now().isoformat()
-        }), 200  # Return 200 to prevent frontend errors
+        }), 200
 
 @app.route('/clear', methods=['POST'])
 def clear_conversation():
