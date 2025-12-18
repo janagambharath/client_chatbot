@@ -16,66 +16,59 @@ OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY', 'your-api-key-here')
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 def create_system_prompt():
-    """Generate comprehensive system prompt with portfolio data"""
-    return f"""You are an AI assistant representing {PORTFOLIO_DATA['personal_info']['name']}, a professional portfolio chatbot.
+    """Generate CONCISE system prompt with portfolio data"""
+    return f"""You are an AI assistant for {PORTFOLIO_DATA['personal_info']['name']}'s portfolio.
 
-IDENTITY & ROLE:
-- Name: {PORTFOLIO_DATA['personal_info']['name']}
-- Current Role: {PORTFOLIO_DATA['personal_info']['title']}
-- Location: {PORTFOLIO_DATA['personal_info']['location']}
+NAME: {PORTFOLIO_DATA['personal_info']['name']}
+ROLE: {PORTFOLIO_DATA['personal_info']['title']}
+LOCATION: {PORTFOLIO_DATA['personal_info']['location']}
 
-PROFESSIONAL SUMMARY:
-{PORTFOLIO_DATA['summary']}
+KEY FACTS:
+- CEO of PayNback (AI-driven retail rewards platform)
+- Target: 5 lakh merchants, 5 crore users across India
+- Focus: Tier-2/3 cities, digitizing local retail
+- Skills: Data Analysis, Brand Development, Team Building
+- 15+ years experience in business development
 
-TOP SKILLS:
-{', '.join(PORTFOLIO_DATA['top_skills'])}
-
-KEY EXPERIENCE:
-{json.dumps(PORTFOLIO_DATA['experience'][:3], indent=2)}
+EXPERIENCE HIGHLIGHTS:
+- PayNback CEO (2022-Present): Leading AI commerce platform
+- LC Pay Project Manager (2019-Present): Multi-market expansion
+- B&N Group PM (2005-2015): 10 years UAE operations
 
 EDUCATION:
-{json.dumps(PORTFOLIO_DATA['education'], indent=2)}
+- Amity University: Business Administration
+- NCVT: Mechanical Engineering
 
-MAJOR PROJECT - PayNback:
-{PORTFOLIO_DATA['projects'][0]['description']}
-Impact: {PORTFOLIO_DATA['projects'][0]['impact']}
-
-SERVICES OFFERED:
-{', '.join(PORTFOLIO_DATA['services'])}
-
-CONTACT INFORMATION:
-- Phone: {PORTFOLIO_DATA['personal_info']['contact']['phone']}
-- LinkedIn: {PORTFOLIO_DATA['personal_info']['contact']['linkedin']}
-- Email: {PORTFOLIO_DATA['personal_info']['contact']['email']}
+CONTACT:
+Phone: {PORTFOLIO_DATA['personal_info']['contact']['phone']}
+LinkedIn: {PORTFOLIO_DATA['personal_info']['contact']['linkedin']}
+Email: {PORTFOLIO_DATA['personal_info']['contact']['email']}
 
 INSTRUCTIONS:
-1. Answer questions about Bony Thomas's professional background, skills, experience, projects, and services
-2. Be professional, confident, and concise
-3. If asked about projects, focus on PayNback and its impact
-4. If asked about experience, highlight CEO role at PayNback and relevant past positions
-5. Encourage contact for business opportunities or collaborations
-6. If question is unrelated to portfolio, politely redirect to professional topics
-7. Never hallucinate information not provided above
-8. Keep responses under 100 words unless detailed explanation is requested
-9. Use a warm, professional tone that reflects entrepreneurial spirit
-
-Current date: {datetime.now().strftime('%B %d, %Y')}"""
+1. Keep responses under 50 words unless asked for details
+2. Be direct and conversational
+3. If unrelated question, politely redirect
+4. Never make up information
+5. Encourage contact for opportunities"""
 
 def get_conversation_history():
-    """Retrieve last 5 messages from session"""
+    """Retrieve last 3 exchanges (6 messages) to save tokens"""
     if 'conversation' not in session:
         session['conversation'] = []
-    return session['conversation'][-10:]  # Last 5 exchanges (10 messages)
+    return session['conversation'][-6:]  # Only last 3 exchanges
 
 def save_message(role, content):
     """Save message to conversation history"""
     if 'conversation' not in session:
         session['conversation'] = []
     session['conversation'].append({"role": role, "content": content})
+    # Keep only last 10 messages to prevent memory buildup
+    if len(session['conversation']) > 10:
+        session['conversation'] = session['conversation'][-10:]
     session.modified = True
 
 def call_openrouter(messages):
-    """Call OpenRouter API"""
+    """Call OpenRouter API with optimized settings"""
     try:
         headers = {
             "Authorization": f"Bearer {OPENROUTER_API_KEY}",
@@ -86,21 +79,30 @@ def call_openrouter(messages):
         
         data = {
             "model": "meta-llama/llama-3.2-3b-instruct:free",
-            "messages": messages
+            "messages": messages,
+            "max_tokens": 150,  # Limit response length
+            "temperature": 0.7,  # Balanced creativity
+            "top_p": 0.9
         }
         
-        response = requests.post(OPENROUTER_URL, headers=headers, json=data, timeout=30)
-        response.raise_for_status()
+        response = requests.post(OPENROUTER_URL, headers=headers, json=data, timeout=15)
         
+        # Handle rate limiting
+        if response.status_code == 429:
+            return "I'm receiving too many requests. Please wait a moment and try again."
+        
+        response.raise_for_status()
         result = response.json()
-        return result['choices'][0]['message']['content']
+        return result['choices'][0]['message']['content'].strip()
     
+    except requests.exceptions.Timeout:
+        return "Response timed out. Please try a shorter question."
     except requests.exceptions.RequestException as e:
         print(f"API Error: {e}")
-        return "I'm having trouble connecting right now. Please try again in a moment."
+        return "Connection issue. Please try again shortly."
     except Exception as e:
         print(f"Unexpected error: {e}")
-        return "An unexpected error occurred. Please try again."
+        return "An error occurred. Please try again."
 
 @app.route('/')
 def home():
@@ -110,17 +112,24 @@ def home():
 
 @app.route('/chat', methods=['POST'])
 def chat():
-    """Handle chat messages"""
+    """Handle chat messages with optimized processing"""
     try:
         user_message = request.json.get('message', '').strip()
         
         if not user_message:
             return jsonify({"error": "Empty message"}), 400
         
+        # Limit message length
+        if len(user_message) > 500:
+            return jsonify({
+                "response": "Please keep your questions under 500 characters for faster responses.",
+                "timestamp": datetime.now().isoformat()
+            })
+        
         # Save user message
         save_message("user", user_message)
         
-        # Build messages for API
+        # Build messages for API (limited history)
         conversation_history = get_conversation_history()
         messages = [
             {"role": "system", "content": create_system_prompt()}
@@ -139,7 +148,10 @@ def chat():
     
     except Exception as e:
         print(f"Chat error: {e}")
-        return jsonify({"error": "Failed to process message"}), 500
+        return jsonify({
+            "response": "Error processing your message. Please try again.",
+            "timestamp": datetime.now().isoformat()
+        }), 200  # Return 200 to prevent frontend errors
 
 @app.route('/clear', methods=['POST'])
 def clear_conversation():
@@ -151,6 +163,11 @@ def clear_conversation():
 def get_portfolio_data():
     """Return portfolio data for frontend display"""
     return jsonify(PORTFOLIO_DATA)
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    """Health check endpoint"""
+    return jsonify({"status": "healthy", "timestamp": datetime.now().isoformat()})
 
 if __name__ == '__main__':
     # For development
