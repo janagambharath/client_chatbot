@@ -80,7 +80,7 @@ def call_openrouter(messages):
         data = {
             "model": "meta-llama/llama-3.3-70b-instruct:free",  # Updated to Llama 3.3 70B
             "messages": messages,
-            "max_tokens": 200,  # Increased slightly for better responses from larger model
+            "max_tokens": 350,  # Increased slightly for better responses from larger model
             "temperature": 0.7,  # Balanced creativity
             "top_p": 0.9
         }
